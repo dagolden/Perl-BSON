@@ -6,6 +6,7 @@ use warnings;
 use Test::More tests => 17;
 use Tie::IxHash;
 use DateTime;
+use Math::Int64 qw/:native_if_available int64/;
 
 use BSON qw/encode decode/;
 
@@ -35,7 +36,7 @@ subtest int64 => sub {
     plan tests => 2;
     %h = ( a => 1, b => 2147483647, c => -2147483648 );
     %h =
-      ( a => 2147483648, b => 9223372036854775807, c => -9223372036854775808 );
+      ( a => int64('2147483648'), b => int64('9223372036854775807'), c => int64('-9223372036854775808') );
     my $bson = encode( \%h );
     is_deeply(
         [ unpack "C*", $bson ],
@@ -54,7 +55,7 @@ subtest int64 => sub {
 subtest mix_ints => sub {
     plan tests => 2;
     %h = ( a => 1, b => 2147483647, c => -2147483648 );
-    %h = ( a => 2147483648, b => 1, c => -20 );
+    %h = ( a => int64('2147483648'), b => 1, c => -20 );
     my $bson = encode( \%h );
     is_deeply(
         [ unpack "C*", $bson ],

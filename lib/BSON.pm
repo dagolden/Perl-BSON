@@ -11,6 +11,7 @@ our $VERSION = 0.07;
 
 use Carp;
 use Tie::IxHash;
+use Math::Int64 qw/:native_if_available int64 int64_to_native native_to_int64/;
 
 use BSON::Time;
 use BSON::Timestamp;
@@ -26,10 +27,10 @@ use BSON::String;
 our $MAX_SIZE = 16 * 1024 * 1024;
 
 # Max integer sizes
-our $min_int_32 = -2**32 / 2;
-our $max_int_32 = 2**32 / 2 - 1;
-our $min_int_64 = -2**64 / 2;
-our $max_int_64 = 2**64 / 2 - 1;
+our $min_int_32 = -(1<<31);
+our $max_int_32 =  (1<<31) - 1;
+our $min_int_64 = -(int64(1)<<63);
+our $max_int_64 =  (int64(1)<<63) - 1;
 
 #<<<
 my $int_re     = qr/^(?:(?:[+-]?)(?:[0123456789]+))$/;
@@ -42,6 +43,16 @@ sub e_name {
 
 sub string {
     pack 'V/Z*', shift;
+}
+
+sub pack_q {
+    return int64_to_native(shift);
+}
+
+sub unpack_qastar {
+    my ($bson, $l1, $l2) = @_;
+    ($l1, $l2, $bson) = unpack('L2a*',$bson);
+    return (native_to_int64(pack('L2',$l1, $l2)), $bson);
 }
 
 sub s_arr {
@@ -58,7 +69,7 @@ sub s_int {
         croak("MongoDB can only handle 8-byte integers");
     }
     return $value > $max_int_32 || $value < $min_int_32
-      ? e_name( 0x12, $key ) . pack( 'q', $value )
+      ? e_name( 0x12, $key ) . pack_q( $value )
       : e_name( 0x10, $key ) . pack( 'l', $value );
 }
 
@@ -80,7 +91,7 @@ sub s_re {
 
 sub s_dt {
     my ( $key, $value ) = @_;
-    e_name( 0x09, $key ) . pack( 'q', $value->epoch * 1000 );
+    e_name( 0x09, $key ) . pack_q( $value->epoch * int64(1000) );
 }
 
 sub s_code {
@@ -128,7 +139,7 @@ sub s_hash {
 
         # Datetime
         elsif ( ref $value eq 'BSON::Time' ) {
-            $bson .= e_name( 0x09, $key ) . pack( 'q', $value->value );
+            $bson .= e_name( 0x09, $key ) . pack_q( $value->value );
         }
 
         # Timestamp
@@ -169,7 +180,7 @@ sub s_hash {
         }
 
         # Int (32 and 64)
-        elsif ( $value =~ $int_re ) {
+        elsif ( ref $value eq 'Math::Int64' || $value =~ $int_re ) {
             $bson .= s_int( $key, $value );
         }
 
@@ -238,7 +249,7 @@ sub d_hash {
 
         # Datetime
         elsif ( $type == 0x09 ) {
-            ( my $dt, $bson ) = unpack( 'qa*', $bson );
+            ( my $dt, $bson ) = unpack_qastar( $bson );
             $value = BSON::Time->new( int( $dt / 1000 ) );
         }
 
@@ -280,7 +291,7 @@ sub d_hash {
 
         # Int64
         elsif ( $type == 0x12 ) {
-            ( $value, $bson ) = unpack( 'qa*', $bson );
+            ( $value, $bson ) = unpack_qastar( $bson );
         }
 
         # MinKey
