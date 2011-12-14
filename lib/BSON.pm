@@ -416,6 +416,10 @@ L<BSON::Timestamp>, L<Tie::IxHash>, L<MongoDB>
 
 minimalist, C<< <minimalist at lavabit.com> >>
 
+=head1 CONTRIBUTORS
+
+Oleg Kostyuk C<< <cub@cpan.org> >>
+
 =head1 BUGS
 
 Bug reports and patches are welcome. Reports which include a failing
