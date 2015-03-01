@@ -439,7 +439,7 @@ Test::More style test are helpful and will receive priority.
 =head1 DEVELOPMENT
 
 The source code of this module is available on GitHub:
-L<https://github.com/naturalist/Perl-BSON>
+L<https://github.com/dagolden/Perl-BSON>
 
 =head1 LICENSE AND COPYRIGHT
 
