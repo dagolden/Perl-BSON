@@ -78,7 +78,7 @@ Test::More style test are helpful and will receive priority.
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2011 minimalist.
+Copyright 2015 minimalist.
 
 This program is free software; you can redistribute it and/or modify 
 it under the terms as perl itself.
