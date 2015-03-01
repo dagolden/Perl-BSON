@@ -14,13 +14,14 @@ WriteMakefile(
     PREREQ_PM => {
         'Math::Int64' => 0,
         'Tie::IxHash' => 0,
-        'Test::More'  => 0.94,
-        'Test::Deep'  => 0,
-        'Carp'        => 0
     },
     BUILD_REQUIRES => {
-        'DateTime' => 0
-    },
+        'DateTime'            => 0,
+        'Test::More'          => 0.94,
+        'Test::Deep'          => 0,
+        'Test::Spelling'      => 0,
+        'Test::CheckManifest' => 0,
+      },
     MIN_PERL_VERSION    => '5.008',
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'BSON-*' },
